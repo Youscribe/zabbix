@@ -5,21 +5,27 @@
 # Apache 2.0
 #
 
-cookbook_file "/tmp/zabbixapi.gem" do
+c = cookbook_file "/tmp/zabbixapi.gem" do
   source "zabbixapi.gem"
   mode "0644"
   action :create
+  notifies :upgrade, "gem_package[zabbixapi]"
 end
 
 # find it here : https://github.com/Youscribe/zabbixapi
 # TODO check here : https://github.com/xeron/zabbixapi if pull request have been accept and upload in rubygem
-chef_gem "zabbixapi" do
+g = gem_package "zabbixapi" do
   source "/tmp/zabbixapi.gem"
-  action :install
+  action :nothing
   options(:force => true, :prerelease => true)
   notifies :delete, "cookbook_file[/tmp/zabbixapi.gem]"
+  only_if "test -f /tmp/zabbixapi.gem"
 end
 
+c.run_action(:create)
+g.run_action(:upgrade)
+
+Gem.clear_paths
 require 'zabbixapi'
 
 zabbixServer = search(:node, "chef_environment:#{node.chef_environment} AND recipes:zabbix\\:\\:server").first
