@@ -23,7 +23,7 @@ g = gem_package "zabbixapi" do
 end
 
 c.run_action(:create)
-g.run_action(:upgrade)
+g.run_action(:install)
 
 Gem.clear_paths
 require 'zabbixapi'
