@@ -28,3 +28,4 @@ DBPassword=<%= node.zabbix.server.dbpassword %>
 PidFile=<%= node.zabbix.run_dir %>/zabbix_server.pid
 Include=<%= node.zabbix.server.include_dir %>
 AlertScriptsPath=<%= node.zabbix.alert_dir %>
+ExternalScripts=<%= node['zabbix']['server']['external_dir'] %>
