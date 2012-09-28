@@ -10,7 +10,7 @@ include_recipe 'python'
 
 mercurial "#{Chef::Config[:file_cache_path]}/ztc" do
   repository "https://bitbucket.org/rvs/ztc"
-  reference "tip"
+#  reference "tip"
   action :sync
   notifies :run, "execute[install ztc]"
 end

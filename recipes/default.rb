@@ -68,7 +68,7 @@ zabbix_dirs.each do |dir|
     # Only execute this if zabbix can't write to it. This handles cases of
     # dir being world writable (like /tmp)
     # [ File.word_writable? doesn't appear until Ruby 1.9.x ]
-    not_if "su #{node.zabbix.login} -c \"test -d #{dir} && test -w #{dir}\""
+#    not_if "su #{node.zabbix.login} -c \"test -d #{dir} && test -w #{dir}\""
   end
 end
 
