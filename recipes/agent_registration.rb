@@ -5,9 +5,12 @@
 # Apache 2.0
 #
 
-c = cookbook_file "/tmp/zabbixapi.gem" do
+c = cookbook_file "zabbixapi.gem" do
   source "zabbixapi.gem"
-  mode "0644"
+  path "#{Chef::Config[:file_cache_path]}/zabbixapi.gem"
+  unless node['plateform'] == "windows" 
+    mode "0644"
+  end
   action :create
   notifies :upgrade, "gem_package[zabbixapi]"
 end
@@ -15,11 +18,11 @@ end
 # find it here : https://github.com/Youscribe/zabbixapi
 # TODO check here : https://github.com/xeron/zabbixapi if pull request have been accept and upload in rubygem
 g = gem_package "zabbixapi" do
-  source "/tmp/zabbixapi.gem"
+  source "#{Chef::Config[:file_cache_path]}/zabbixapi.gem"
   action :nothing
-  options(:force => true, :prerelease => true)
-  notifies :delete, "cookbook_file[/tmp/zabbixapi.gem]"
-  only_if "test -f /tmp/zabbixapi.gem"
+  options("--force --prerelease")
+  notifies :delete, "cookbook_file[zabbixapi.gem]"
+  only_if {File.exists?("#{Chef::Config[:file_cache_path]}/zabbixapi.gem")}
 end
 
 c.run_action(:create)
