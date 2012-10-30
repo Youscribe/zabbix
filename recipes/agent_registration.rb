@@ -35,7 +35,7 @@ class Chef::Recipe
   include TcpPortOpen
 end
 
-zabbixServer = search(:node, "chef_environment:#{node.chef_environment} AND recipes:zabbix\\:\\:server").first
+zabbixServer = search(:node, "recipes:zabbix\\:\\:server").first
 if port_open?(zabbixServer['zabbix']['web']['fqdn'], 80)
 
   zbx = Zabbix::ZabbixApi.new("http://#{zabbixServer['zabbix']['web']['fqdn']}/api_jsonrpc.php",zabbixServer['zabbix']['web']['login'],zabbixServer['zabbix']['web']['password'])
