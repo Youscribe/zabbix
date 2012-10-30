@@ -11,10 +11,38 @@ default['zabbix']['agent']['hostname'] = node['hostname']
 default['zabbix']['agent']['configure_options'] = [ "--with-libcurl" ]
 if node['os'] == "windows"
   default['zabbix']['agent']['install_method'] = "windows_suiviperf"
+  default['zabbix']['install_dir'] = "C:\\Program Files\\Zabbix Agent"
+  default['zabbix']['etc_dir'] = node['zabbix']['install_dir']
+  default['zabbix']['web_dir'] = nil
+  default['zabbix']['external_dir'] = nil
+  default['zabbix']['alert_dir'] = nil
+  default['zabbix']['lock_dir'] = nil
+  default['zabbix']['src_dir'] = nil
+  default['zabbix']['log_dir'] = node['zabbix']['install_dir']
+  default['zabbix']['run_dir'] = nil
+  default['zabbix']['bin_dir'] = node['zabbix']['install_dir']
 else
   default['zabbix']['agent']['install_method'] = "prebuild"
+  default['zabbix']['agent']['include_dir'] = "/opt/zabbix/agent_include"
+
+  default['zabbix']['install_dir'] = "/opt/zabbix"
+  default['zabbix']['etc_dir'] = "/etc/zabbix"
+  default['zabbix']['web_dir'] = "/opt/zabbix/web"
+  default['zabbix']['external_dir'] = "/opt/zabbix/externalscripts"
+  default['zabbix']['alert_dir'] = "/opt/zabbix/AlertScriptsPath"
+  default['zabbix']['lock_dir'] = "/var/lock/subsys"
+  default['zabbix']['src_dir'] = "/opt"
+  default['zabbix']['log_dir'] = "/var/log/zabbix"
+  default['zabbix']['run_dir'] = "/var/run/zabbix"
+  default['zabbix']['bin_dir'] = "/opt/zabbix/bin"
+
+  default['zabbix']['login'] = "zabbix"
+  default['zabbix']['group'] = "zabbix"
+  default['zabbix']['uid'] = nil
+  default['zabbix']['gid'] = nil
+  default['zabbix']['home'] = '/opt/zabbix'
+  default['zabbix']['shell'] = "/bin/false"
 end
-default['zabbix']['agent']['include_dir'] = "/opt/zabbix/agent_include"
 
 default['zabbix']['server']['install'] = false
 default['zabbix']['server']['version'] = "2.0.0"
@@ -41,20 +69,3 @@ default['zabbix']['web']['fqdn'] = nil
 default['zabbix']['web']['login'] = "Admin"
 default['zabbix']['web']['password'] = "zabbix"
 default['zabbix']['web']['aliases'] = ["zabbix"]
-
-default['zabbix']['install_dir'] = "/opt/zabbix"
-default['zabbix']['etc_dir'] = "/etc/zabbix"
-default['zabbix']['web_dir'] = "/opt/zabbix/web"
-default['zabbix']['external_dir'] = "/opt/zabbix/externalscripts"
-default['zabbix']['alert_dir'] = "/opt/zabbix/AlertScriptsPath"
-default['zabbix']['lock_dir'] = "/var/lock/subsys"
-default['zabbix']['src_dir'] = "/opt"
-default['zabbix']['log_dir'] = "/var/log/zabbix"
-default['zabbix']['run_dir'] = "/var/run/zabbix"
-
-default['zabbix']['login'] = "zabbix"
-default['zabbix']['group'] = "zabbix"
-default['zabbix']['uid'] = nil
-default['zabbix']['gid'] = nil
-default['zabbix']['home'] = '/opt/zabbix'
-default['zabbix']['shell'] = "/bin/false"

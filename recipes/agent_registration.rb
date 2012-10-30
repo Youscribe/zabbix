@@ -12,7 +12,7 @@ c = cookbook_file "zabbixapi.gem" do
     mode "0644"
   end
   action :create
-  notifies :upgrade, "gem_package[zabbixapi]"
+  notifies :install, "gem_package[zabbixapi]"
 end
 
 # find it here : https://github.com/Youscribe/zabbixapi

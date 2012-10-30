@@ -6,6 +6,7 @@ windows_package "zabbix" do
   elsif  node['kernel']['machine'] == "x86_64"
     source "http://www.suiviperf.com/zabbix/zabbix_agent-2.0.2_x64.msi"
   end
+  installer_type :msi
   options "/qn"
   action :install
 end
