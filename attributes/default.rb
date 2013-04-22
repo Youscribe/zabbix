@@ -9,6 +9,7 @@ default['zabbix']['agent']['servers'] = []
 default['zabbix']['agent']['servers_active'] = []
 default['zabbix']['agent']['hostname'] = node['hostname']
 default['zabbix']['agent']['configure_options'] = [ "--with-libcurl" ]
+default['zabbix']['agent']['groups']            = [ "chef-agent" ]
 if node['os'] == "windows"
   default['zabbix']['agent']['install_method'] = "windows_suiviperf"
   default['zabbix']['install_dir'] = "C:\\Program Files\\Zabbix Agent"
@@ -24,7 +25,6 @@ if node['os'] == "windows"
 else
   default['zabbix']['agent']['install_method'] = "prebuild"
   default['zabbix']['agent']['include_dir'] = "/opt/zabbix/agent_include"
-
   default['zabbix']['install_dir'] = "/opt/zabbix"
   default['zabbix']['etc_dir'] = "/etc/zabbix"
   default['zabbix']['web_dir'] = "/opt/zabbix/web"

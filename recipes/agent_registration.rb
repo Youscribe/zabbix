@@ -5,7 +5,7 @@
 # Apache 2.0
 #
 
-chef_gem "zabbixapi"
+chef_gem "zabbixapi" do
   action :install
   version "> 0.5.3"
 end
@@ -21,21 +21,25 @@ if port_open?(zabbixServer['zabbix']['web']['fqdn'], 80)
     :password => zabbixServer['zabbix']['web']['password']
   )
 
-  ruby_block "add chef-agent group" do
-    block do
-      zbx.hostgroups.create(
-        :host => "chef-agent"
-      )
+  groups_id = []
+  node['zabbix']['agent']['groups'].each do |group|
+    ruby_block "Create group on Zabbix server" do
+      block do
+        zbx.hostgroups.create(
+          :host => group
+        )
+      end
+      not_if { zbx.hostgroups.get_id(:name => group) }
     end
-    not_if { zbx.hostgroups.get_id(:name => "chef-agent") }
+    groups_id += [ zbx.hostgroups.get_id(:name => group) ]
   end
 
-  ruby_block "register agent" do
+  ruby_block "Create or update host on Zabbix server" do
     block do
       zbx.hosts.create_or_update(
         :host => node['zabbix']['agent']['hostname'],
         :usedns => true,
-        :groups => [ :groupid => zbx.hostgroups.get_id(:name => "chef-agent") ]
+        :groups => groups_id
       )
     end
   end
