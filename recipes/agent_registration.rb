@@ -5,9 +5,9 @@
 # Apache 2.0
 #
 
-chef_gem "zabbixapi" do
-  action :upgrade
-  version "~> 0.5"
+chef_gem "zabbixapi"
+  action :install
+  version "> 0.5.3"
 end
 
 require 'zabbixapi'
