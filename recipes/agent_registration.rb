@@ -7,7 +7,7 @@
 
 chef_gem "zabbixapi" do
   action :install
-  version "> 0.5.3"
+  version ">= 0.5.8"
 end
 
 require 'zabbixapi'
@@ -31,14 +31,22 @@ if port_open?(zabbixServer['zabbix']['web']['fqdn'], 80)
       end
       not_if { zbx.hostgroups.get_id(:name => group) }
     end
-    groups_id += [ zbx.hostgroups.get_id(:name => group) ]
+    groups_id += [ :groupid => zbx.hostgroups.get_id(:name => group).to_s ]
   end
 
   ruby_block "Create or update host on Zabbix server" do
     block do
       zbx.hosts.create_or_update(
         :host => node['zabbix']['agent']['hostname'],
-        :usedns => true,
+        :interfaces => [
+        {
+            :type => 1,
+            :main => 1,
+            :ip => '',
+            :port => 10050,
+            :dns => node['zabbix']['agent']['hostname'],
+            :useip => 0
+        }],
         :groups => groups_id
       )
     end
