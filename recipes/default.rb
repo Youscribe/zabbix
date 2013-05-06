@@ -7,6 +7,10 @@
 # Apache 2.0
 #
 
+if node["platform"] == "windows"
+  return
+end
+
 # Create zabbix group
 group node['zabbix']['login'] do
   gid node['zabbix']['gid']
