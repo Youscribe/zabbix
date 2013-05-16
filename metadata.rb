@@ -16,5 +16,6 @@ depends          "mysql", ">= 1.3.0"
 depends          "ufw",  ">= 0.6.1"
 depends          "yum"
 depends          "postgresql"
+depends          "ark"
 
 recommends       "windows"

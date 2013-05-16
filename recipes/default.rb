@@ -30,13 +30,13 @@ user node['zabbix']['login'] do
   gid node['zabbix']['gid'] 
 end
 
+if node['zabbix']['agent']['install']
+  include_recipe "zabbix::agent_#{node['zabbix']['agent']['install_method']}"
+end
+
 # Define root owned folders
 root_dirs = [
   node['zabbix']['etc_dir'],
-  node['zabbix']['install_dir'],
-  "#{node['zabbix']['install_dir']}/bin",
-  "#{node['zabbix']['install_dir']}/sbin",
-  "#{node['zabbix']['install_dir']}/share",
   node['zabbix']['external_dir'],
   node['zabbix']['server']['include_dir'],
   node['zabbix']['agent']['include_dir'],
@@ -73,8 +73,3 @@ zabbix_dirs.each do |dir|
     not_if "su #{node['zabbix']['login']} -c \"test -d #{dir} && test -w #{dir}\""
   end
 end
-
-if node['zabbix']['agent']['install']
-  include_recipe "zabbix::agent_#{node['zabbix']['agent']['install_method']}"
-end
-
