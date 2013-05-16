@@ -1,15 +1,6 @@
-include_recipe "windows"
+include_recipe "chocolatey"
 
-windows_package "zabbix" do
-  if node['kernel']['machine'] == "x86"
-    source "http://www.suiviperf.com/zabbix/zabbix_agent-2.0.4_x86.msi"
-  elsif  node['kernel']['machine'] == "x86_64"
-    source "http://www.suiviperf.com/zabbix/zabbix_agent-2.0.4_x64.msi"
-  end
-  installer_type :msi
-  options "/qn"
-  action :install
-end
+chocolatey "zabbix-agent"
 
 service "zabbix_agentd" do
   service_name "Zabbix Agent"
