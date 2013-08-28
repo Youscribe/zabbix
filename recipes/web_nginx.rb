@@ -2,6 +2,8 @@ include_recipe "zabbix::common"
 
 # Install nginx and disable default site
 node.override['nginx']['default_site_enabled'] = false
+node.override['php-fpm']['pool']['www']['listen'] = node['zabbix']['web']['php']['fastcgi_listen']
+include_recipe "php-fpm"
 include_recipe "nginx"
 
 # Install php-fpm to execute PHP code from nginx
@@ -36,6 +38,7 @@ end
 zabbix_source "extract_zabbix_web" do
   branch              node['zabbix']['server']['branch']
   version             node['zabbix']['server']['version']
+  source_url          node['zabbix']['server']['source_url']
   code_dir            node['zabbix']['src_dir']
   target_dir          "zabbix-#{node['zabbix']['server']['version']}"  
   install_dir         node['zabbix']['install_dir']
@@ -63,6 +66,10 @@ template ::File.join(conf_dir, "zabbix.conf.php") do
   owner "root"
   group "root"
   mode "754"
+  variables ({
+    :database => node['zabbix']['database'],
+    :server => node['zabbix']['server']
+  })
   notifies :restart, "service[php-fpm]", :delayed
 end
 
@@ -73,6 +80,7 @@ template "/etc/nginx/sites-available/zabbix" do
   group "root"
   mode "754"
   variables ({
+    :server_name => node['zabbix']['web']['fqdn'],
     :php_settings => node['zabbix']['web']['php']['settings'],
     :web_port => node['zabbix']['web']['port'],
     :web_dir => node['zabbix']['web_dir'],

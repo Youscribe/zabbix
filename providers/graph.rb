@@ -1,55 +1,71 @@
 action :create do
 
-    chef_gem "zabbixapi" do
-        action :install
-        version "~> 0.5.9"
+  chef_gem "zabbixapi" do
+    action :install
+    version "~> 0.5.9"
+  end
+
+  require 'zabbixapi'
+
+  Chef::Zabbix.with_connection(new_resource.server_connection) do |connection|
+
+    new_resource.graph_items.each do |graph_item|
+      if graph_item[:item_template]
+        template_id = Zabbix::API.find_template_ids(connection, graph_item[:item_template]).first['templateid']
+        if new_resource.prototype
+          item_ids = Zabbix::API.find_item_prototype_ids(connection, template_id, graph_item[:item_key])
+        else
+          item_ids = Zabbix::API.find_item_ids(connection, template_id, graph_item[:item_key])
+        end
+      else
+        item_ids = Zabbix::API.find_item_ids_on_host(connection, graph_item[:host], graph_item[:item_key])
+      end
+      graph_item[:itemid] = item_ids.first['itemid']
     end
 
-    require 'zabbixapi'
+    params = {
+      :name => new_resource.name,
 
-    Chef::Zabbix.with_connection(new_resource.server_connection) do |connection|
-        # turn the name into an Id
-        new_resource.parameters[:gitems].each do |gitem|
-            itemId = connection.query( :method => "item.get",
-                                       :params => {
-                                           :hostids => connection.templates.get_id( :name => gitem[:hostName] ),
-                                           :search => {
-                                               :key_ => gitem[:key],
-                                               :hostname => gitem[:hostName] }
-                                              })
-            gitem[:itemid] = itemId[0]['itemid']
-            # remove the unused data
-            gitem.delete(:key)
-            gitem.delete(:hostName)
-        end
+      :width => new_resource.width,
+      :height => new_resource.height,
+      :yaxismin => new_resource.yaxismin,
+      :yaxismax => new_resource.yaxismax,
+      :percent_left => new_resource.percent_left,
+      :percent_right => new_resource.percent_right,
 
-        # Convert the "hostname" (a template name) into a hostid
-        hostId = connection.query( :method => "template.get",
-                                   :params => {
-                                       :filter => {
-                                           :host => new_resource.parameters[:hostName]}
-                                              })
-        # does this graph exist?
-        graphId = connection.query( :method => "graph.get",
-                                    :params => {
-                                        :filter => {
-                                            :name => new_resource.parameters[:name]},
-                                        :search => {
-                                            :hostid => hostId,},
-                                                   })
+      :show_work_period => new_resource.show_work_period ? '1' : '0',
+      :show_triggers => new_resource.show_triggers ? '1' : '0',
+      :show_legend => new_resource.show_legend ? '1' : '0',
+      :show_3d => new_resource.show_3d ? '1' : '0',
 
-        if graphId.size == 0
-            # Send the creation request to the server
-            connection.query( :method => "graph.create",
-                             :params => new_resource.parameters
-                            )
-           else
-               # Send the update request to the server
-               new_resource.parameters[:graphid] = graphId[0]['graphid']
-               connection.query( :method => "graph.update",
-                                 :params => new_resource.parameters
-                               )
-        end
+      :type => new_resource.type.value,
+      :ymin_type => new_resource.ymin_type.value,
+      :ymax_type => new_resource.ymax_type.value,
+      :ymin_item => new_resource.ymin_item.to_s,
+      :ymax_item => new_resource.ymax_item.to_s,
+
+      :gitems => new_resource.graph_items.map(&:to_hash)
+    }
+
+    noun = (new_resource.prototype) ? 'graphprototype' : 'graph'
+    verb = 'create'
+
+    if new_resource.prototype
+      graph_ids = Zabbix::API.find_graph_prototype_ids(connection, new_resource.name)
+    else
+      graph_ids = Zabbix::API.find_graph_ids(connection, new_resource.name)
     end
-    new_resource.updated_by_last_action(true)
+
+    unless graph_ids.empty?
+      verb = 'update'
+      params[:graphid] = graph_ids.first['graphid']
+    end
+
+    method = "#{noun}.#{verb}"
+    connection.query({
+      :method => method,
+      :params => params
+    })
+  end
+  new_resource.updated_by_last_action(true)
 end

@@ -1,60 +1,74 @@
 action :create do
 
     chef_gem "zabbixapi" do
-        action :install
-        version "~> 0.5.9"
+      action :install
+      version "~> 0.5.9"
     end
 
     require 'zabbixapi'
 
     Chef::Zabbix.with_connection(new_resource.server_connection) do |connection|
-        # Convert the "hostname" (a template name) into a hostid
-        hostId = connection.query( :method => "template.get",
-                                   :params => {
-                                       :filter => {
-                                           :host => new_resource.parameters[:hostName]}
-                                              })
-        new_resource.parameters[:applicationNames].each do |application|
-            appId =  connection.query( :method => "application.get",
-                                   :params => {
-                                       :hostids => hostId[0]['hostid'],
-                                       :filter => {
-                                           :name => application[:applicationName]},
-                                              })
- 
-            application[:applicationid] = appId[0]['applicationid']
-            # remove the unused data
-            application.delete(:applicationName)
+      template_ids = Zabbix::API.find_template_ids(connection, new_resource.template)
+      if template_ids.empty?
+        Chef::Application.fatal! "Could not find a template named #{new_resource.template}"
+      end
+
+      template_id = template_ids.first['hostid']
+
+      application_ids = new_resource.applications.map do |application|
+        app_ids = Zabbix::API.find_application_ids(connection, application, template_id) 
+        if app_ids.empty?
+          Chef::Application.fatal! "Could not find an application named #{application}"
         end
+        app_ids.map { |app_id| app_id['applicationid'] }
+      end.flatten
 
+      noun = (new_resource.discovery_rule_key.nil?) ? "item" : "itemprototype"
+      verb = "create"
 
-        itemId = connection.query( :method => "item.get",
-                                   :params => {
-                                       :hostids => hostId[0]['hostid'],
-                                       :filter => { 
-                                           :name => new_resource.parameters[:name],},
-                                       :search => {
-                                           :key_ => new_resource.parameters[:key_],},
-                                              })
-        if itemId.size == 0
-            # Make a new params with the correct parameters
-            new_resource.parameters[:hostid] = hostId[0]['hostid']
-            # Remove the bad parameter
-            new_resource.parameters.delete(:hostName)
-            new_resource.parameters.delete(:applicationNames)
-            # Send the creation request to the server
-            connection.query( :method => "item.create",
-                              :params => new_resource.parameters
-                            )
-        else
-            # Add the item ID to params and send the udate
-            new_resource.parameters[:itemid] = itemId[0]['itemid']
-            puts new_resource.parameters
-            connection.query( :method => "item.update",
-                              :params => new_resource.parameters
-                            )
-        end
-  end
+      params = {}
+      simple_value_keys = [
+        :name, :delay, :description, :snmp_community, :snmp_oid, 
+        :port, :params, :multiplier, :history, :trends, :allowed_hosts,
+        :units, :snmpv3_securityname, :snmpv3_authpassphrase, :snmpv3_privpassphrase,
+        :formula, :delay_flex, :ipmi_sensor, :username, :password,
+        :publickey, :privatekey, :inventory_link, :valuemap,
+      ]
+      simple_value_keys.each do |key|
+        params[key] = new_resource.send(key)
+      end
 
-  new_resource.updated_by_last_action(true)
+      enum_value_keys = [
+        :type, :value_type, :status, :delta, :snmpv3_securitylevel,
+        :data_type, :authtype,
+      ]
+      enum_value_keys.each do |key|
+        params[key] = new_resource.send(key).value
+      end
+
+      params[:params] = new_resource.item_params
+      params[:key_] = new_resource.key
+      params[:hostid] = template_id
+      params[:applications] = application_ids
+      unless new_resource.discovery_rule_key.nil?
+        discovery_rule_id = Zabbix::API.find_lld_rule_ids(connection, template_id, new_resource.discovery_rule_key).first["itemid"]
+        params[:ruleid] = discovery_rule_id
+      end
+
+      if new_resource.discovery_rule_key.nil?
+        item_ids = Zabbix::API.find_item_ids(connection, template_id, new_resource.key, new_resource.name)
+      else
+        item_ids = Zabbix::API.find_item_prototype_ids(connection, template_id, new_resource.key, discovery_rule_id)
+      end
+
+      unless item_ids.empty?
+        verb = "update"
+        params[:itemid] = item_ids.first['itemid']
+      end
+
+      connection.query(:method => "#{noun}.#{verb}",
+                       :params => params)
+    end
+
+    new_resource.updated_by_last_action(true)
 end

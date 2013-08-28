@@ -31,13 +31,12 @@ when "redhat","centos","scientific","amazon","oracle"
   when 'mysql', 'rds_mysql'
     php_packages = (node['platform_version'].to_i < 6)?
       %w{ php53-mysql php53-gd php53-bcmath php53-mbstring php53-xml } :
-      %w{ php-mysql php-gd php-bcmath php-mbstring php-xml php-xmlwriter }
-    packages.push('mysql-devel')
+      %w{ php-mysql php-gd php-bcmath php-mbstring php-xml }
     packages.push(*php_packages)
   when 'postgres'
     php_packages = (node['platform_version'].to_i < 6)?
       %w{ php5-pgsql php5-gd php5-xml } :
-      %w{ php-pgsql php-gd php-bcmath php-mbstring php-xml php-xmlwriter } 
+      %w{ php-pgsql php-gd php-bcmath php-mbstring php-xml } 
     packages.push(*php_packages)
   end
   init_template = 'zabbix_server.init-rh.erb'
@@ -50,7 +49,7 @@ packages.each do |pck|
 end
 
 configure_options = node['zabbix']['server']['configure_options'].dup
-configure_options = (|| Array.new).delete_if do |option|
+configure_options = (configure_options || Array.new).delete_if do |option|
   option.match(/\s*--prefix(\s|=).+/)
 end
 case node['zabbix']['database']['install_method']
@@ -64,6 +63,9 @@ end
 node.normal['zabbix']['server']['configure_options'] = configure_options
 
 zabbix_source "install_zabbix_server" do
+  branch              node['zabbix']['server']['branch']
+  version             node['zabbix']['server']['version']
+  source_url          node['zabbix']['server']['source_url']
   branch              node['zabbix']['server']['branch']
   version             node['zabbix']['server']['version']
   code_dir            node['zabbix']['src_dir']
@@ -90,11 +92,14 @@ template "#{node['zabbix']['etc_dir']}/zabbix_server.conf" do
   group "root"
   mode "644"
   variables ({
-    :dbhost     => node['zabbix']['database']['dbhost'],
-    :dbname     => node['zabbix']['database']['dbname'],
-    :dbuser     => node['zabbix']['database']['dbuser'],
-    :dbpassword => node['zabbix']['database']['dbpassword'],
-    :dbport     => node['zabbix']['database']['dbport']
+    :dbhost             => node['zabbix']['database']['dbhost'],
+    :dbname             => node['zabbix']['database']['dbname'],
+    :dbuser             => node['zabbix']['database']['dbuser'],
+    :dbpassword         => node['zabbix']['database']['dbpassword'],
+    :dbport             => node['zabbix']['database']['dbport'],
+    :java_gateway       => node['zabbix']['server']['java_gateway'],
+    :java_gateway_port  => node['zabbix']['server']['java_gateway_port'],
+    :java_pollers       => node['zabbix']['server']['java_pollers']
   })
   notifies :restart, "service[zabbix_server]", :delayed
 end

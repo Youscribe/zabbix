@@ -10,6 +10,13 @@ Default login password for zabbix frontend is admin / zabbix  CHANGE IT !
 
 Be careful when you update your server version, you need to run the sql patch in /opt/zabbix-$VERSION.
 
+If you do not specify source\_url attributes for agent or server they will be set to download the specified
+branch and version from the official Zabbix source repository. If you want to upgrade later, you need to 
+either nil out the source\_url attributes or set them to the url you wish to download from.
+
+    node['zabbix']['agent']['source_url'] = nil 
+    node['zabbix']['server']['source_url'] = nil 
+
 Please include the default recipe before using any other recipe. 
 
 Installing the Agent :
@@ -37,7 +44,7 @@ Installing all 3 - Database MUST come before Server
 
 NOTE:
 
-If you are running on Redhat, Centos, Scientific of Amazon, you will need packages from EPEL.
+If you are running on Redhat, Centos, Scientific or Amazon, you will need packages from EPEL.
 Include "recipe[yum::epel]" in your runlist or satisfy these requirements some other way.
 
     "recipe[yum::epel]"
@@ -62,12 +69,14 @@ example :
 
 	  node.set['zabbix']['server']['branch'] = "ZABBIX%20Latest%20Stable"
 	  node.set['zabbix']['server']['version'] = "2.0.0"
+	  node.set['zabbix']['server']['source_url'] = nil
 	  ndoe.set['zabbix']['server']['install_method'] = "source"
 
 ## Agent
 
 	  node.set['zabbix']['agent']['branch'] = "ZABBIX%20Latest%20Stable"
 	  node.set['zabbix']['agent']['version'] = "2.0.0"
+	  node.set['zabbix']['agent']['source_url'] = nil
 	  node.set['zabbix']['agent']['install_method'] = "prebuild"
 
 ## Database
