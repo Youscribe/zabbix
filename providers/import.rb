@@ -26,7 +26,51 @@ def import()
   Chef::Zabbix.with_connection(new_resource.server_connection) do |connection|
     connection.configurations.import(:format => new_resource.format,
     :rules => {
-        new_resource.type => {
+        :applications => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :discoveryRules => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :graphs => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :groups => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :images => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :items => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :maps => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :screens => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :templateLinkage => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :templates => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :templateScreens => {
+            :createMissing => true,
+            :updateExisting => true
+        },
+        :triggers => {
             :createMissing => true,
             :updateExisting => true
         }
