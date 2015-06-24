@@ -5,7 +5,7 @@ def whyrun_supported?
 end
 
 action :import do
-	converge_by("Importing object '#{new_resource.group}'") do
+	converge_by("Importing object '#{new_resource.name}'") do
 	  import(new_resource.group)
 	end
 	new_resource.updated_by_last_action(true)
