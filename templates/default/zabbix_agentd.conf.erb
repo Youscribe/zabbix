@@ -2,7 +2,7 @@
 # Created by chef
 Hostname=<%= node['zabbix']['agent']['hostname'] %>
 Include=<%= node['zabbix']['agent']['include_dir'] %>
-Server=<%= node.zabbix.agent.servers.join(',') %>
+Server=<%= node['zabbix']['agent']['servers'].join(',') %>
 <% if node['zabbix']['agent']['log_file'] -%>
 LogFile=<%= node['zabbix']['agent']['log_file'] %>
 <% end -%>
@@ -22,3 +22,5 @@ ServerActive=<%= node.zabbix.agent.servers_active.join(',') %>
 <% if node['zabbix']['agent']['start_agents'] -%>
 StartAgents=<%= node['zabbix']['agent']['start_agents'] %>
 <% end -%>
+ListenPort=<%=node['zabbix']['agent']['listen_port'] %>
+Timeout=<%= node['zabbix']['agent']['timeout'] %>

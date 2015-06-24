@@ -1,4 +1,7 @@
+[![Build Status](https://travis-ci.org/laradji/zabbix.png?branch=master)](https://travis-ci.org/laradji/zabbix)
+
 # DESCRIPTION
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/laradji/zabbix?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This cookbook install zabbix-agent and zabbix-server.
 
@@ -11,13 +14,13 @@ Default login password for zabbix frontend is admin / zabbix  CHANGE IT !
 Be careful when you update your server version, you need to run the sql patch in /opt/zabbix-$VERSION.
 
 If you do not specify source\_url attributes for agent or server they will be set to download the specified
-branch and version from the official Zabbix source repository. If you want to upgrade later, you need to 
+branch and version from the official Zabbix source repository. If you want to upgrade later, you need to
 either nil out the source\_url attributes or set them to the url you wish to download from.
 
-    node['zabbix']['agent']['source_url'] = nil 
-    node['zabbix']['server']['source_url'] = nil 
+    node['zabbix']['agent']['source_url'] = nil
+    node['zabbix']['server']['source_url'] = nil
 
-Please include the default recipe before using any other recipe. 
+Please include the default recipe before using any other recipe.
 
 Installing the Agent :
 
@@ -29,7 +32,7 @@ Installing the Server :
     "recipe[zabbix::server]"
 
 Installing the Database :
-  
+
     "recipe[mysql::server]",
     "recipe[zabbix]",
     "recipe[zabbix::database]"
@@ -63,7 +66,7 @@ A Zabbix agent running on the Zabbix server will need to :
 * use a different account than the on the server uses or it will be able to spy on private data.
 * specify the local Zabbix server using the localhost (127.0.0.1, ::1) address.
 
-example : 
+example :
 
 ## Server
 
@@ -89,7 +92,7 @@ example :
     node.set['zabbix']['database']['dbport'] = "3306"
 
 If you are using AWS RDS
-  
+
     node.set['zabbix']['database']['install_method'] = 'rds_mysql'
     node.set['zabbix']['database']['rds_master_user'] = 'username'
     node.set['zabbix']['database']['rds_master_password'] = 'password'
@@ -127,7 +130,7 @@ You can control the agent version with:
 Downloads and installs the Zabbix agent from source
 
 If you are on a machine in the RHEL family of platforms, then you will
-need to install packages from the EPEL repository. The easiest way to do this 
+need to install packages from the EPEL repository. The easiest way to do this
 is to add the following recipe to your runlist before zabbix::agent\_source
 
     recipe "yum::epel"
@@ -141,7 +144,7 @@ You can control the agent install with:
 ## database
 
 WARNING: This recipe persists your database credentials back to the Chef server
-as plaintext  node attributes. To prevent this, consume the `zabbix_database` 
+as plaintext  node attributes. To prevent this, consume the `zabbix_database`
 LWRP in your own wrapper cookbook.
 
 Creates and initializes the Zabbix database
@@ -206,7 +209,7 @@ If you are user a Postgres database make sure your runlist includes:
 Downloads and installs the Zabbix Server component from source
 
 If you are on a machine in the RHEL family of platforms, then you will
-need to install packages from the EPEL repository. The easiest way to do this 
+need to install packages from the EPEL repository. The easiest way to do this
 is to add the following recipe to your runlist before zabbix::server\_source
 
     recipe "yum::epel"
@@ -273,7 +276,7 @@ If you are using MySQL make sure you set
     root_password "your root password"
 
 If you are using RDS MySql make sure you set
-  
+
     root_username "your rds master username"
     root_password "your rds master password"
 
@@ -299,7 +302,7 @@ Fetchs the Zabbix source tar and does something with it
 #### Actions
 * `extract_only` (Default Action) - Just fetch and extract the tar
 * `install_server` - Fetch the tar then compile the source as a Server
-* `install_agent` - Fetch the tar then compile the source as an Agent 
+* `install_agent` - Fetch the tar then compile the source as an Agent
 
 #### Attributes
 * `name` (Name Attribute) - An arbitrary name for the resource
@@ -321,6 +324,9 @@ Default implementation of how to Fetch and handle the Zabbix source code.
 * LWRP Magic ?
 
 # CHANGELOG
+
+### 0.8.0
+* This version is a big change with a lot of bugfix and change. Please be carefull if you are updated from previous version
 
 ### 0.0.42
 * Adds Berkshelf/Vagrant 1.1 compatibility (andrewGarson)
@@ -393,7 +399,7 @@ Default implementation of how to Fetch and handle the Zabbix source code.
   * Add example for Chef Solo usage to Vagrantfile
 
 ### 0.0.27
-  * Configuration error about include_dir in zabbix_agentd.conf.erb	
+  * Configuration error about include_dir in zabbix_agentd.conf.erb
 
 ###	0.0.26
   * zabbix agent and zabbix server don't want the same include_dir, be carefull if you use include_dir
@@ -425,7 +431,7 @@ Default implementation of how to Fetch and handle the Zabbix source code.
   * Fix README
 
 ### 0.0.18
-  * Fix sysconfdir to point to /etc/zabbix on recipe server_source 
+  * Fix sysconfdir to point to /etc/zabbix on recipe server_source
   * Fix right for folder frontends/php on recipe web
   * Hardcode the PATH of conf file in initscript
   * Agent source need to build on a other folder
@@ -434,7 +440,7 @@ Default implementation of how to Fetch and handle the Zabbix source code.
 ### 0.0.17
   * Don't mess with te PID, PID are now in /tmp
 
-### 0.0.16 
+### 0.0.16
   * Add depencies for recipe agent_source
   * Add AlertScriptsPath folder and option for server.
 
@@ -447,7 +453,7 @@ Default implementation of how to Fetch and handle the Zabbix source code.
 ### 0.0.13
   * Fix some issue on web receipe.
 
-### 0.0.12 
+### 0.0.12
   * Change default value of zabbix.server.dbpassword to nil
 
 ### 0.0.11
@@ -461,13 +467,13 @@ Default implementation of how to Fetch and handle the Zabbix source code.
 ### 0.0.9
   * Tune of mikoomi for running on agent side.
 
-### 0.0.8 
+### 0.0.8
   * Fix some major issu
 
-### 0.0.7 
+### 0.0.7
   * Add some love to php value
   * Now recipe mysql_setup populate the database
   * Minor fix
 
-### 0.0.6 
+### 0.0.6
   * Change the name of the web_app to fit the fqdn

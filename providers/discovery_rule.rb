@@ -1,15 +1,4 @@
 action :create do
-
-  begin
-    require 'zabbixapi'
-  rescue LoadError
-    chef_gem "zabbixapi" do
-      action :install
-      version "~> 0.5.9"
-    end
-    require 'zabbixapi'
-  end
-
   Chef::Zabbix.with_connection(new_resource.server_connection) do |connection|
     template_ids = Zabbix::API.find_template_ids(connection, new_resource.template)
     if template_ids.empty?
@@ -18,7 +7,7 @@ action :create do
 
     template_id = template_ids.first['hostid']
 
-    method = "discoveryrule.create"
+    method = 'discoveryrule.create'
     params = {}
     simple_value_keys = [
       :name, :delay, :lifetime, :delay_flex, :description,
@@ -38,13 +27,13 @@ action :create do
     end
 
     params[:hostid] = template_id
-    params[:key_] = new_resource.key 
+    params[:key_] = new_resource.key
     params[:params] = new_resource.discovery_rule_params
     params[:trapper_hosts] = new_resource.allowed_hosts
 
     rule_ids = Zabbix::API.find_lld_rule_ids(connection, template_id, new_resource.key)
     unless rule_ids.empty?
-      method = "discoveryrule.update"
+      method = 'discoveryrule.update'
       params[:itemid] = rule_ids.first['itemid']
     end
 
@@ -52,4 +41,9 @@ action :create do
                      :params => params)
   end
   new_resource.updated_by_last_action(true)
+end
+
+def load_current_resource
+  run_context.include_recipe 'zabbix::_providers_common'
+  require 'zabbixapi'
 end

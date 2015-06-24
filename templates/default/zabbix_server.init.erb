@@ -10,6 +10,8 @@ DESC="Zabbix server daemon"
 DIR=<%= node.zabbix.run_dir %>
 PID=<%= node.zabbix.run_dir %>/$NAME.pid
 
+. /lib/lsb/init-functions
+
 test -f $DAEMON || exit 0
 
 [ -d "$DIR" ] || mkdir "$DIR"
@@ -33,6 +35,7 @@ case "$1" in
         ;;
   status)
         status_of_proc $DAEMON "Zabbix server"
+        exit $?
         ;;
   *)
         N=/etc/init.d/$NAME

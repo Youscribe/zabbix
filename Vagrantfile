@@ -1,23 +1,23 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# This Vagrantfile needs the vagrant-omnbius plugin installed
+# To install this, run "vagrant plugin install vagrant-omnibus"
+
 Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vbox|
     vbox.customize ['modifyvm', :id,
                     '--memory', 1024]
   end
 
-  config.vm.box = "Berkshelf-CentOS-6.3-x86_64-minimal"
-  config.vm.box_url = "https://dl.dropbox.com/u/31081437/Berkshelf-CentOS-6.3-x86_64-minimal.box"
+  config.vm.box = "Chef-CentOS-6.5"
+  config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box"
 
   config.vm.hostname = "zabbix-berkshelf"
   server_ip = "192.168.50.10"
   config.vm.network :private_network, ip: server_ip
 
-  config.ssh.max_tries = 40
-  config.ssh.timeout   = 120
-
-  config.vm.provision :shell, :inline => "sudo /opt/chef/embedded/bin/gem install chef -v 10.24.0"
+  config.omnibus.chef_version = "11.6.2"
   config.vm.provision :chef_solo do |chef|
     chef.json = {
       :mysql => {
@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
           'servers_active' => [server_ip]
         },
         'web' => {
-          'install_method' => 'nginx',
+          'install_method' => 'apache',
           'fqdn' => server_ip
         },
         'server' => {
@@ -51,26 +51,14 @@ Vagrant.configure("2") do |config|
       }
     }
 
-    chef.run_list = [
-      "recipe[yum::epel]",
+    chef.add_recipe "database::mysql"
+    chef.add_recipe "mysql::server"
+    chef.add_recipe "zabbix"
+    chef.add_recipe "zabbix::database"
+    chef.add_recipe "zabbix::server"
+    chef.add_recipe "zabbix::web"
+    chef.add_recipe "zabbix::agent_registration"
 
-      "recipe[zabbix::default]",
-
-      "recipe[database::mysql]",
-      "recipe[mysql::server]",
-      #"recipe[database::postgresql]",
-      #"recipe[postgresql::server]",
-      "recipe[zabbix::database]",
-
-      "recipe[mysql::client]",
-      #"recipe[postgresql::client]",
-      "recipe[zabbix::server]",
-
-      #"recipe[apache2]",
-      #"recipe[apache2::mod_php5]",
-      "recipe[zabbix::web]",
-
-      "recipe[zabbix::agent_registration]"
-    ]
+    #chef.log_level = :debug
   end
 end

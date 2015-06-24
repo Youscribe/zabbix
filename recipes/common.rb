@@ -13,12 +13,23 @@ root_dirs = [
 ]
 
 # Create root folders
-root_dirs.each do |dir|
-  directory dir do
-    owner "root"
-    group "root"
-    mode "755"
-    recursive true
+case node['platform_family']
+when 'windows'
+  root_dirs.each do |dir|
+    directory dir do
+      owner 'Administrator'
+      rights :read, 'Everyone', :applies_to_children => true
+      recursive true
+    end
+  end
+else
+  root_dirs.each do |dir|
+    directory dir do
+      owner 'root'
+      group 'root'
+      mode '755'
+      recursive true
+    end
   end
 end
 
@@ -33,12 +44,11 @@ zabbix_dirs.each do |dir|
   directory dir do
     owner node['zabbix']['login']
     group node['zabbix']['group']
-    mode "755"
+    mode '755'
     recursive true
     # Only execute this if zabbix can't write to it. This handles cases of
     # dir being world writable (like /tmp)
-    # [ File.word_writable? doesn't appear until Ruby 1.9.x ]
-    not_if "su #{node['zabbix']['login']} -c \"test -d #{dir} && test -w #{dir}\""
+    not_if { ::File.world_writable?(dir) }
   end
 end
 
@@ -49,5 +59,3 @@ end
 unless node['zabbix']['server']['source_url']
   node.default['zabbix']['server']['source_url'] = Chef::Zabbix.default_download_url(node['zabbix']['server']['branch'], node['zabbix']['server']['version'])
 end
-
-
