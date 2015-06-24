@@ -6,12 +6,12 @@ end
 
 action :import do
 	converge_by("Importing object '#{new_resource.name}'") do
-	  import(new_resource.group)
+	  import()
 	end
 	new_resource.updated_by_last_action(true)
 end
 
-def import(group)
+def import()
   run_context.include_recipe 'zabbix::_providers_common'
   require 'zabbixapi'
   
