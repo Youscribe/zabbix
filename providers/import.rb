@@ -15,10 +15,11 @@ def import()
   run_context.include_recipe 'zabbix::_providers_common'
   require 'zabbixapi'
   
+  content = new_resource.content 
   unless new_resource.url.nil?
     Chef::Log.info("Loading data from '#{new_resource.url}'")
     open(new_resource.url) do |f|
-      new_resource.content = f.read
+       content = f.read
     end
   end
 
@@ -30,6 +31,6 @@ def import()
             :updateExisting => true
         }
     },
-	:source => new_resource.content)
+	:source => content)
   end
 end
