@@ -47,5 +47,6 @@ default['zabbix']['agent']['zabbix_agent_port']  = '10050'
 default['zabbix']['agent']['snmp_port']          = '161'
 
 default['zabbix']['agent']['win_user']          = 'Administrator'
+default['zabbix']['agent']['win_principal_everyone']          = 'Everyone'
 
 default['zabbix']['agent']['user_parameter'] = []

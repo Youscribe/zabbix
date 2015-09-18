@@ -18,7 +18,7 @@ when 'windows'
   root_dirs.each do |dir|
     directory dir do
       owner node['zabbix']['agent']['win_user']
-      rights :read, 'Everyone', :applies_to_children => true
+      rights :read, node['zabbix']['agent']['win_principal_everyone'], :applies_to_children => true
       recursive true
     end
   end
