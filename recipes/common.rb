@@ -17,7 +17,7 @@ case node['platform_family']
 when 'windows'
   root_dirs.each do |dir|
     directory dir do
-      owner 'Administrator'
+      owner node['zabbix']['agent']['win_user']
       rights :read, 'Everyone', :applies_to_children => true
       recursive true
     end
